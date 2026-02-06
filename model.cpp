@@ -16,10 +16,13 @@
 #include "model.h"
 #include "stable-diffusion.h"
 #include "util.h"
+
+#ifdef SD_USE_VOCAB
 #include "vocab.hpp"
 #include "vocab_mistral.hpp"
 #include "vocab_qwen.hpp"
 #include "vocab_umt5.hpp"
+#endif
 
 #include "ggml-alloc.h"
 #include "ggml-backend.h"
@@ -1340,6 +1343,7 @@ void ModelLoader::set_wtype_override(ggml_type wtype, std::string tensor_type_ru
     }
 }
 
+#ifdef SD_USE_VOCAB
 std::string ModelLoader::load_merges() {
     std::string merges_utf8_str(reinterpret_cast<const char*>(merges_utf8_c_str), sizeof(merges_utf8_c_str));
     return merges_utf8_str;
@@ -1369,6 +1373,31 @@ std::string ModelLoader::load_umt5_tokenizer_json() {
     std::string json_str(reinterpret_cast<const char*>(umt5_tokenizer_json_str), sizeof(umt5_tokenizer_json_str));
     return json_str;
 }
+#else
+std::string ModelLoader::load_merges() {
+    return "";
+}
+
+std::string ModelLoader::load_qwen2_merges() {
+    return "";
+}
+
+std::string ModelLoader::load_mistral_merges() {
+    return "";
+}
+
+std::string ModelLoader::load_mistral_vocab_json() {
+    return "";
+}
+
+std::string ModelLoader::load_t5_tokenizer_json() {
+    return "";
+}
+
+std::string ModelLoader::load_umt5_tokenizer_json() {
+    return "";
+}
+#endif
 
 bool ModelLoader::load_tensors(on_new_tensor_cb_t on_new_tensor_cb, int n_threads_p, bool enable_mmap) {
     int64_t process_time_ms = 0;
